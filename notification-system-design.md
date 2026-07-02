@@ -46,37 +46,34 @@ Marks one notification as read.
   "message": "Notification marked as read"
 }
 ```
-
 ---
-
 ### 4. Mark All Notifications as Read
-
 **Endpoint**
-
 PATCH /notifications/read-all
-
 **Description**
-
 Marks all notifications as read.
-
 ---
-
 ### 5. Get Notifications by Type
-
 **Endpoint**
-
 GET /notifications?type=Placement
-
 **Description**
-
 Returns notifications filtered by notification type.
 
 ---
-
 ### Status Codes
-
 - 200 OK
 - 201 Created
 - 400 Bad Request
 - 404 Not Found
 - 500 Internal Server Error
+
+## Stage 2 - Database Design
+### Selected Database
+**PostgreSQL**
+### Why PostgreSQL?
+PostgreSQL is selected because:
+- It provides ACID-compliant transactions.
+- It efficiently handles large datasets.
+- Supports indexing for faster notification retrieval.
+- Excellent support for filtering and sorting.
+- Highly reliable and scalable.
