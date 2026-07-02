@@ -149,3 +149,117 @@ Using the recommended indexing strategy provides the following benefits:
 - Efficient filtering and sorting.
 - Better scalability for millions of notification records.
 - Improved overall database performance.
+
+
+## Stage 4 - Performance Improvement
+
+### Problem Statement
+
+Currently, the application fetches all notifications from the database whenever a student opens the application. As the number of users and notifications grows, this approach causes high database load, slower response times, and poor user experience.
+
+### Proposed Solutions
+
+#### 1. Pagination
+
+Instead of fetching all notifications at once, retrieve notifications in smaller batches (for example, 20 notifications per request).
+
+**Advantages**
+
+- Reduces database load.
+- Faster API response.
+- Lower memory usage.
+- Better user experience.
+
+**Tradeoff**
+
+- Requires multiple API calls when users scroll through notifications.
+
+---
+
+#### 2. Caching
+
+Store recently accessed notifications in an in-memory cache such as Redis.
+
+**Advantages**
+
+- Very fast response time.
+- Reduces repeated database queries.
+- Improves application scalability.
+
+**Tradeoff**
+
+- Cached data may become stale if not updated properly.
+- Additional cache management is required.
+
+---
+
+#### 3. Lazy Loading / Infinite Scrolling
+
+Load only the first few notifications initially and fetch more when the user scrolls down.
+
+**Advantages**
+
+- Faster initial page load.
+- Lower bandwidth usage.
+- Better user experience.
+
+**Tradeoff**
+
+- Requires additional frontend implementation.
+
+---
+
+#### 4. Background Synchronization
+
+Load notifications in the background after the application starts instead of blocking the user interface.
+
+**Advantages**
+
+- Faster application startup.
+- Improved responsiveness.
+
+**Tradeoff**
+
+- Newly arrived notifications may appear with a slight delay.
+
+---
+
+#### 5. Database Indexing
+
+Use indexes on frequently searched columns such as:
+
+- studentID
+- isRead
+- notificationType
+- createdAt
+
+**Advantages**
+
+- Faster query execution.
+- Efficient filtering and sorting.
+
+**Tradeoff**
+
+- Slightly slower INSERT and UPDATE operations.
+- Additional storage for indexes.
+
+---
+
+### Recommended Solution
+
+A combination of the following techniques provides the best performance:
+
+- Pagination
+- Redis Caching
+- Lazy Loading
+- Proper Database Indexing
+
+This approach minimizes database load, improves scalability, and provides a smooth user experience even when millions of notifications are stored.
+
+### Expected Outcome
+
+- Faster notification retrieval.
+- Reduced database workload.
+- Improved scalability.
+- Better response time.
+- Smooth user experience for all students.
