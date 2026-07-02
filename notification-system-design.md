@@ -263,3 +263,94 @@ This approach minimizes database load, improves scalability, and provides a smoo
 - Improved scalability.
 - Better response time.
 - Smooth user experience for all students.
+
+## Stage 5 - Reliable Notification System Design
+
+### Problems with the Existing Implementation
+
+The current implementation processes notifications one student at a time. If any operation such as sending an email fails, the remaining students will not receive notifications. This makes the system unreliable and difficult to recover from failures.
+
+### Shortcomings
+
+- Sequential processing is slow for 50,000 students.
+- A single failure stops the entire process.
+- Email sending depends on external services and may fail.
+- No retry mechanism is available.
+- Failed notifications are difficult to identify and resend.
+
+### Improved Design
+
+The notification system should use asynchronous message queues.
+
+Instead of processing notifications immediately, each notification request is placed into a queue. Worker services consume messages from the queue independently and perform email delivery, database storage, and push notifications.
+
+### Proposed Workflow
+
+1. HR clicks "Notify All".
+2. Notification requests are added to a Message Queue.
+3. Worker services read messages from the queue.
+4. Each worker:
+   - Saves the notification into the database.
+   - Sends email.
+   - Sends push notification.
+5. Failed requests are automatically retried.
+6. Successfully processed requests are acknowledged and removed from the queue.
+
+### Advantages
+
+- Highly scalable.
+- Faster processing.
+- Supports retry mechanism.
+- Failures do not affect other students.
+- Reliable notification delivery.
+- Better fault tolerance.
+
+### Should Database Save and Email Sending Happen Together?
+
+No.
+
+Saving notifications to the database and sending emails should be handled independently.
+
+The notification should first be stored successfully in the database. Email and push notifications can then be processed asynchronously by worker services.
+
+This ensures that notifications are never lost even if the email service becomes temporarily unavailable.
+
+### Recommended Technologies
+
+- RabbitMQ or Apache Kafka for Message Queue.
+- Worker Services for background processing.
+- Retry Mechanism for failed notifications.
+- Dead Letter Queue (DLQ) for permanently failed messages.
+
+### Improved Pseudocode
+
+```python
+function notify_all(student_ids, message):
+
+    for student_id in student_ids:
+
+        add_to_queue(student_id, message)
+
+
+worker():
+
+    while queue is not empty:
+
+        notification = get_next_message()
+
+        save_to_database(notification)
+
+        send_email(notification)
+
+        push_notification(notification)
+
+        acknowledge_message()
+```
+
+### Expected Benefits
+
+- Reliable notification delivery.
+- Handles failures gracefully.
+- Supports millions of notifications.
+- High availability.
+- Better user experience.
