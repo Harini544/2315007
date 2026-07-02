@@ -11,75 +11,66 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const TOKEN = process.env.TOKEN;
 
-// Check whether token is loaded
-console.log("==================================");
-console.log("Token Loaded :", TOKEN ? "YES" : "NO");
-console.log("Token Length :", TOKEN ? TOKEN.length : 0);
-console.log("==================================");
+// API given in the assignment
+const API_URL = "http://4.224.186.213/evaluation-service/notifications";
 
-// Affordmed Notification API
-const API_URL = "http://20.244.56.144/evaluation-service/notifications";
-
-// Home Route
 app.get("/", (req, res) => {
-    res.send("Notification Backend Running...");
+    res.send("Notification Backend Running");
 });
 
-// Notification Route
 app.get("/notifications", async (req, res) => {
 
-    try {
+    if (!TOKEN) {
+        return res.status(500).json({
+            success: false,
+            message: "TOKEN not found in .env"
+        });
+    }
 
-        if (!TOKEN) {
-            return res.status(500).json({
-                success: false,
-                message: "Bearer Token not found in .env"
-            });
-        }
+    try {
 
         const response = await axios.get(API_URL, {
             headers: {
                 Authorization: `Bearer ${TOKEN}`
-            },
-            timeout: 10000
+            }
         });
-
-        console.log("========== SUCCESS ==========");
-        console.log(response.data);
-        console.log("=============================");
 
         res.status(200).json(response.data);
 
-    } catch (error) {
+    } catch (err) {
 
-        console.log("\n========== ERROR ==========");
+        console.log("========== API ERROR ==========");
 
-        if (error.response) {
+        if (err.response) {
+            console.log("Status :", err.response.status);
+            console.log("Response :", err.response.data);
 
-            console.log("Status :", error.response.status);
-            console.log("Status Text :", error.response.statusText);
-            console.log("Response Data :");
-            console.log(error.response.data);
-
-        } else {
-
-            console.log("Message :", error.message);
-
+            return res.status(err.response.status).json({
+                success: false,
+                message: "Notification API Error",
+                error: err.response.data
+            });
         }
 
-        console.log("===========================\n");
+        if (err.request) {
+            console.log("No response from server");
 
-        res.status(error.response?.status || 500).json({
+            return res.status(500).json({
+                success: false,
+                message: "No response from Notification API"
+            });
+        }
+
+        console.log(err.message);
+
+        return res.status(500).json({
             success: false,
-            message: "Unable to fetch notifications.",
-            error: error.response?.data || error.message
+            message: err.message
         });
-
     }
 
 });
 
-// Start Server
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
